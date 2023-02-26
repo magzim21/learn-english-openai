@@ -1,0 +1,94 @@
+---
+AWSTemplateFormatVersion: '2010-09-09'
+Description: 'CloudFormation template to create Amazon Cognito Userpool'
+Parameters:
+  GooglClientId:
+    Type: String
+  GooglClientSecret:
+    Type: String
+Resources:
+  MyUserPool:
+    Type: AWS::Cognito::UserPool
+    Properties:
+      UserPoolName: MyUserPool
+      UsernameAttributes:
+        - email
+      Schema:
+        - Name: email
+          AttributeDataType: String
+          Mutable: true
+          Required: true
+        - Name: name
+          AttributeDataType: String
+          Mutable: true
+          Required: true
+      AutoVerifiedAttributes:
+        - email
+      Policies:
+        PasswordPolicy:
+          MinimumLength: 8
+          RequireLowercase: true
+          RequireNumbers: true
+          RequireSymbols: true
+          RequireUppercase: true
+      AdminCreateUserConfig:
+        AllowAdminCreateUserOnly: false
+      AccountRecoverySetting:
+        RecoveryMechanisms:
+          - Name: verified_email
+            Priority: 1
+          - Name: verified_phone_number
+            Priority: 2
+      # EnabledMfas:
+      #   - SMS_MFA
+      #   - SOFTWARE_TOKEN_MFA
+      # UserPoolAddOns:
+      #   AdvancedSecurityMode: OFF
+      # MfaConfiguration: OFF
+      UserPoolTags:
+        MyTag: MyValue
+  GoogleIDP:
+    Type: AWS::Cognito::UserPoolIdentityProvider
+    Properties: 
+      AttributeMapping:
+        email: email
+        name: name
+      ProviderName: Google
+      ProviderType: Google
+      # IdpIdentifiers: 
+      #   - test
+      ProviderDetails:
+        client_id: 
+          Ref: GooglClientId
+        client_secret: 
+          Ref: GooglClientSecret
+
+        authorize_scopes: email profile openid
+      UserPoolId: !Ref MyUserPool
+  MyUserPoolDomain:
+    Type: AWS::Cognito::UserPoolDomain
+    Properties: 
+      # CustomDomainConfig: 
+      #   CustomDomainConfigType
+      Domain: mydomainko
+      UserPoolId: !Ref MyUserPool
+  MyUserPoolClient:
+    Type: 'AWS::Cognito::UserPoolClient'
+    Properties:
+      UserPoolId: !Ref MyUserPool
+      ClientName: learn-english
+      AllowedOAuthFlows:
+        - implicit
+      AllowedOAuthScopes:
+        - openid
+        - email
+        - profile
+      SupportedIdentityProviders:
+        - COGNITO
+        - Google
+      CallbackURLs: 
+        - http://localhost:3000
+
+# https://mydomainko.auth.ca-central-1.amazoncognito.com/oauth2/authorize?client_id=2cbu8r723nua5fdgjmnh4onbah&response_type=token&redirect_uri=http%3A%2F%2Flocalhost%3A3000%2F&scope=openid&identity_provider=Google
+
+

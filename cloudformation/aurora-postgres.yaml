@@ -1,0 +1,77 @@
+Resources:
+  ServerlessDBCluster:
+    Type: AWS::RDS::DBCluster
+    Properties:
+      Engine: aurora-postgresql
+      EngineMode: serverless
+      ScalingConfiguration:
+        AutoPause: true
+        MaxCapacity: 2
+        MinCapacity: 2
+        SecondsUntilAutoPause: 300
+      # DBSubnetGroupName: !Ref DBSubnetGroup
+      VpcSecurityGroupIds:
+        - Fn::GetAtt: [ PostgresSecurityGroup, GroupId ]
+      # PubliclyAccessible: true # not supported. fuck
+      BackupRetentionPeriod: 7
+      DeletionProtection: false
+      MasterUsername: adminko
+      MasterUserPassword: admin1234!!!d
+      Tags:
+        - Key: Name
+          Value: learn-english-openai
+  # DBSubnetGroup:
+  #   Type: AWS::RDS::DBSubnetGroup
+  #   Properties:
+  #     DBSubnetGroupDescription: "Subnet group for Aurora Serverless"
+  #     SubnetIds:
+  #       - "subnet-xxxxxxxx"
+  #       - "subnet-yyyyyyyy"
+  #       - "subnet-zzzzzzzz"
+  PostgresSecurityGroup:
+    Type: AWS::EC2::SecurityGroup
+    Properties:
+      GroupDescription: "Security group for Aurora Serverless"
+      # VpcId: !Ref VPC
+      SecurityGroupIngress:
+        - IpProtocol: tcp
+          FromPort: 5432
+          ToPort: 5432
+          CidrIp: 0.0.0.0/0
+  SSHSecurityGroup:
+    Type: AWS::EC2::SecurityGroup
+    Properties:
+      GroupDescription: "Security group for Aurora Serverless"
+      # VpcId: !Ref VPC
+      SecurityGroupIngress:
+        - IpProtocol: tcp
+          FromPort: 22
+          ToPort: 22
+          CidrIp: 0.0.0.0/0
+  MyKeyPair:
+    Type: AWS::EC2::KeyPair
+    Properties:
+      KeyName: my-ssh-key # specify the name of your SSH key pair here
+      PublicKeyMaterial: |
+        ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABgQCf0L1IJFpM7VxFqqD8KDzN3vpjaF7OdJYYKGE5ZitZJcfYOAaYmQ2wfgmMf+YXfueZYqN4iEgWBD4KB31rE+X9Q3qTPQebgAxum2Pcny38QSb3iSi38WsUpwx7PbZc1wNIAe9ypD0+PU/jJnIbcJJp8+i7bxUX5XHB/V42N3J5myRZxUFh0Ps76I4agammqG4cW2CkL5BV/9WtSca+Ttl10VLQw3q1RmW1KuLlA2L4Dm8xZp+jUJ8Wb6JAiFosj/uLK/ugkxDP3SzxFePOctRCkjlQmy/aybClmN8V8/yf7qaeUcVIN8OhdNOcfvzdwLjUuYdnFXWhXVYITMQY9pJt8juu+Qv5iKRL3dmqWpnUNf4AcMsaHOO7B64qkKNKYRCq7uLeftE+6LHRm79z9EfLXxrqH2BdY6jnz6BEmaP+k9UXYglSYfM/B0x251C6SpDOazVMG4yQISPTmJRQJqN2CbzwNFoLRz61OQvV4+L6wb5GfPw+ezp/IKTptY0bdgM= maxim@elevatesecurity.com
+
+  MyEC2Instance:
+    Type: AWS::EC2::Instance
+    Properties:
+      ImageId: ami-09e2c09f31b90da99 # Ubuntu x86
+      InstanceType: t3.small
+      KeyName: !Ref MyKeyPair # reference the Key Pair resource here
+      SecurityGroupIds: 
+        - !Ref SSHSecurityGroup
+      # NetworkInterfaces:
+      #   - DeviceIndex: 0
+      #     AssociatePublicIpAddress: true
+      #     DeleteOnTermination: true
+      #     SubnetId: subnet-1234567890abcdef0 # specify your desired subnet ID here
+Outputs:
+  BastionPublicIPAddress:
+    Value: !GetAtt MyEC2Instance.PublicIp
+    Description: The public IP address of the EC2 instance.
+  PostgresEndpoint:
+    Value: !GetAtt ServerlessDBCluster.Endpoint.Address
+    Description: The endpoint of Postgress

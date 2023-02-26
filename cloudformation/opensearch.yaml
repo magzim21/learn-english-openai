@@ -1,0 +1,51 @@
+---
+
+AWSTemplateFormatVersion: '2010-09-09'
+Description: 'CloudFormation template to create Amazon CloudSearch domain'
+Parameters:
+  DomainName:
+    Type: String
+    Default: learn-english-openai
+    AllowedValues:
+      - learn-english-openai
+      - m1.small
+      - m1.large
+    Description: todo
+Resources:
+  CloudSearchDomain:
+    Type: 'AWS::CloudSearch::Domain'
+    Properties:
+      DomainName:  !Ref DomainName
+      ElasticsearchClusterConfig:
+        InstanceCount: 1
+        InstanceType: 't2.small.elasticsearch'
+        ZoneAwarenessEnabled: false
+      EBSOptions:
+        EBSEnabled: true
+        VolumeSize: 10
+      # AccessPolicies: 
+      #   Version: '2012-10-17'
+      #   Statement:
+      #   - Effect: Allow
+      #     Principal: 
+      #       AWS: 
+      #       - '*'
+      #     Action: 
+      #       - 'cloudsearch:*'
+      #     Resource: 
+      #       - !Join 
+      #         - ''
+      #         - - 'arn:aws:cloudsearch:'
+      #           - !Ref 'AWS::Region'
+      #           - ':'
+      #           - !Ref 'AWS::AccountId'
+      #           - ':domain/'
+      #           - !Ref 'CloudSearchDomain'
+      #           - '/search/*'
+
+Outputs:
+  CloudSearchDomainName:
+    Description: 'Name of the CloudSearch domain'
+    Value: !Ref CloudSearchDomain
+    Export:
+      Name: !Sub '${AWS::StackName}-CloudSearchDomainName'

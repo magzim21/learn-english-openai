@@ -1,0 +1,57 @@
+---
+
+AWSTemplateFormatVersion: '2010-09-09'
+Description: 'CloudFormation template to create Amazon CloudSearch domain'
+Parameters:
+  DomainName:
+    Type: String
+    Default: learn-english-openai
+    AllowedValues:
+      - learn-english-openai
+    Description: todo
+Resources:
+  Test:
+    Type: AWS::OpenSearchService::Domain
+    Properties: 
+      # AccessPolicies: Json
+      # AdvancedOptions: 
+      #   Key : Value
+      # AdvancedSecurityOptions: 
+      #   AdvancedSecurityOptionsInput
+      # CognitoOptions: 
+      #   CognitoOptions
+      # DomainEndpointOptions: 
+      #   DomainEndpointOptions
+      DomainName: !Ref DomainName
+      EBSOptions: 
+        EBSEnabled: True
+        # Iops: Integer
+        # Throughput: Integer
+        VolumeSize: 20
+        VolumeType: gp3
+      ClusterConfig: 
+        # DedicatedMasterCount: Integer
+        # DedicatedMasterEnabled: False
+        # DedicatedMasterType: String
+        InstanceCount: 1
+        InstanceType: t3.small.search
+        # WarmCount: Integer
+        # WarmEnabled: Boolean
+        # WarmType: String
+        # ZoneAwarenessConfig: 
+        #   ZoneAwarenessConfig
+        # ZoneAwarenessEnabled: Boolean
+      # ElasticsearchVersion: String
+      # EncryptionAtRestOptions: 
+      #   EncryptionAtRestOptions
+      # LogPublishingOptions: 
+      #   Key : SEARCH_SLOW_LOGS
+      # NodeToNodeEncryptionOptions: 
+      #   NodeToNodeEncryptionOptions
+      # SnapshotOptions: 
+      #   SnapshotOptions
+      Tags: 
+        - Key: foo
+          Value: bar
+      # VPCOptions: 
+      #   VPCOptions
