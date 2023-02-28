@@ -13,6 +13,7 @@ const router = createBrowserRouter([
         <Outlet />,
       </div>
       ),
+    errorElement: <div>NOT FOUND, bro. 404</div>,
     children: [
       {
         path: "about",
